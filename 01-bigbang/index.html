@@ -1,1 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>빅뱅 탈출: 우주의 기원을 완성하라!</title>
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #1a1f29;
+            --accent-color: #00d2ff;
+            --text-color: #e0e6ed;
+            --success-color: #00ff88;
+            --error-color: #ff4b2b;
+        }
 
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        #game-container {
+            width: 90%;
+            max-width: 600px;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+            text-align: center;
+        }
+
+        .stage { display: none; }
+        .stage.active { display: block; animation: fadeIn 0.5s ease; }
+
+        h2 { color: var(--accent-color); margin-bottom: 1rem; }
+        p { line-height: 1.6; font-size: 1.1rem; }
+        
+        .hint {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #333;
+            border-radius: 5px;
+            background: #000;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+        #feedback { margin-top: 15px; font-weight: bold; height: 20px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="stage-0" class="stage active">
+        <h1>🚀 빅뱅 탈출</h1>
+        <p>당신은 시간 여행자입니다.<br>빅뱅 직후 뒤섞인 데이터를 복구하고<br>현재의 우주로 돌아오세요!</p>
+        <button onclick="nextStage(1)">탐사 시작</button>
+    </div>
+
+    <div id="stage-1" class="stage">
+        <h2>STAGE 1: 라이벌 이론</h2>
+        <p>빅뱅 우주론에 대항한 이론으로,<br>우주가 팽창하더라도 물질이 계속 생성되어<br><b>우주의 밀도가 항상 일정</b>하다고 주장한 이론은?</p>
+        <div class="hint">힌트: 정ㅇ ㅇ주론</div>
+        <input type="text" id="input-1" placeholder="정답 입력">
+        <button onclick="checkAnswer(1, '정상우주론')">확인</button>
+    </div>
+
+    <div id="stage-2" class="stage">
+        <h2>STAGE 2: 입자의 이름</h2>
+        <div class="hint">
+            * 입자 A: u, u, d <br>
+            * 입자 B: u, d, d 
+        </div>
+        <p>입자 A, 입자 B의 이름과 이들이 결합해 만든 핵의 이름을 띄어쓰기 없이 쓰세요.</p>
+        <input type="text" id="input-2" placeholder="정답 입력">
+        <button onclick="checkAnswer(2, '양성자중성자헬륨원자핵')">확인</button>
+    </div>
+
+    <div id="stage-3" class="stage">
+        <h2>STAGE 3: 운명의 비율</h2>
+        <p>양성자 14개, 중성자 2개가 있습니다.<br>헬륨 원자핵 1개가 만들어진 후 남은<br><b>수소 원자핵 개수</b>와 <b>헬륨 원자핵 개수</b>를 붙여 쓰세요.</p>
+        <input type="text" id="input-3" placeholder="예: 345">
+        <button onclick="checkAnswer(3, '121')">확인</button>
+    </div>
+
+    <div id="stage-4" class="stage">
+        <h2>STAGE 4: 스펙트럼 분석</h2>
+        <p>다음 중 <b>틀린 설명</b>의 번호를 모두 쓰세요.</p>
+        <div class="hint">
+            1. 별빛은 연속 스펙트럼이다.<br>
+            2. 저온 기체 통과 시 방출 스펙트럼이 나타난다.<br>
+            3. 선 폭으로 질량비를 알 수 있다.<br>
+            4. 수소와 헬륨의 질량비는 1:3이다.
+        </div>
+        <input type="text" id="input-4" placeholder="예: 123">
+        <button onclick="checkAnswer(4, '24')">확인</button>
+    </div>
+
+    <div id="stage-5" class="stage">
+        <h2>STAGE 5: 최후의 발견자</h2>
+        <p>우주 배경 복사를 실제로 관측하여<br>빅뱅 우주론의 승리를 확정 지은<br>두 과학자의 이름을 쓰세요.</p>
+        <div class="hint">힌트: 펜ㅇㅇㅇ, ㅇㅅ (띄어쓰기, 쉼표 없이 입력)</div>
+        <input type="text" id="input-5" placeholder="예: 홍길동임꺽정">
+        <button onclick="checkAnswer(5, '펜지어스윌슨')">확인</button>
+    </div>
+
+    <div id="stage-6" class="stage">
+        <h2 style="color: var(--success-color);">MISSION COMPLETE!</h2>
+        <p>축하합니다! 우주의 비밀을 모두 풀었습니다.<br>당신 덕분에 우주의 역사가 바로잡혔습니다!</p>
+        <button onclick="location.reload()">다시 하기</button>
+    </div>
+
+    <div id="feedback"></div>
+</div>
+
+<script>
+    function nextStage(stageNum) {
+        document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+        document.getElementById('stage-' + stageNum).classList.add('active');
+        document.getElementById('feedback').innerText = '';
+    }
+
+    function checkAnswer(stageNum, correct) {
+        const input = document.getElementById('input-' + stageNum).value.trim();
+        const feedback = document.getElementById('feedback');
+
+        if (input === correct) {
+            feedback.style.color = 'var(--success-color)';
+            feedback.innerText = '정답입니다! 전송 완료.';
+            setTimeout(() => {
+                nextStage(stageNum + 1);
+            }, 800);
+        } else {
+            feedback.style.color = 'var(--error-color)';
+            feedback.innerText = '데이터 오류! 다시 확인하세요.';
+        }
+    }
+</script>
+
+</body>
+</html>
