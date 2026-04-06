@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물질별 스펙트럼 이론값 분석 인포그래픽</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 180px;
+            max-height: 200px;
+            background-color: #000000;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 220px;
+            }
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(94, 234, 212, 0.5);
+        }
+        .card-bg {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-20">
+
+    <header class="pt-16 pb-12 px-6 text-center border-b border-slate-800 bg-slate-900 sticky top-0 z-50 shadow-xl">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-fuchsia-400 to-amber-400 mb-4 tracking-tight">
+                다양한 물질의 스펙트럼 이론값 관찰
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 font-light">
+                LED, 수소, 헬륨, 질소, 네온, 공기 방전관의 고유한 파장 데이터 시각화
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 mt-12 space-y-16">
+
+        <section>
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-teal-300 flex items-center gap-3">
+                    <span class="w-2 h-8 bg-teal-400 rounded-full"></span>
+                    연속 스펙트럼 (Continuous Spectrum)
+                </h2>
+                <p class="mt-2 text-slate-300 leading-relaxed pl-5">
+                    백열등이나 LED등과 같은 광원에서 나오는 빛은 프리즘이나 회절 격자를 통과할 때 가시광선 영역(400nm ~ 700nm) 전체에 걸쳐 색이 끊어지지 않고 연속적인 무지개 띠로 나타납니다. 모든 파장의 빛이 골고루 섞여 있기 때문입니다.
+                </p>
+            </div>
+            
+            <div class="card-bg rounded-2xl p-6 md:p-8 border border-slate-800 shadow-2xl">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-xl font-bold text-white">LED등</h3>
+                    <span class="text-sm px-3 py-1 bg-slate-700 rounded-full text-slate-300 font-medium">연속 발광</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="ledChart"></canvas>
+                </div>
+                <p class="mt-4 text-sm text-slate-400 text-center">400nm부터 700nm까지 전 영역에 걸쳐 에너지가 분포합니다.</p>
+            </div>
+        </section>
+
+        <section>
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-fuchsia-400 flex items-center gap-3">
+                    <span class="w-2 h-8 bg-fuchsia-500 rounded-full"></span>
+                    선 스펙트럼 (Emission Spectrum) - 단일 원소
+                </h2>
+                <p class="mt-2 text-slate-300 leading-relaxed pl-5">
+                    기체 상태의 원소에 높은 전압을 가하면, 원자 내부의 전자가 에너지를 흡수했다가 다시 방출하면서 특정한 파장의 빛만 내놓습니다. 원소마다 전자의 에너지 준위가 다르기 때문에, 나타나는 선의 색깔(파장)과 위치, 개수가 마치 사람의 지문처럼 고유하게 나타납니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card-bg rounded-2xl p-6 border border-slate-800 shadow-xl">
+                    <div class="flex justify-between items-end mb-4">
+                        <h3 class="text-xl font-bold text-white">수소 (H) 방전관</h3>
+                        <span class="text-sm px-3 py-1 bg-slate-700 rounded-full text-slate-300 font-medium">발머 계열</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="hChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-400">가장 단순한 원소로, 가시광선 영역에서 4개의 뚜렷한 선(410nm, 434nm, 486nm, 656nm)이 관찰됩니다.</p>
+                </div>
+
+                <div class="card-bg rounded-2xl p-6 border border-slate-800 shadow-xl">
+                    <div class="flex justify-between items-end mb-4">
+                        <h3 class="text-xl font-bold text-white">헬륨 (He) 방전관</h3>
+                        <span class="text-sm px-3 py-1 bg-slate-700 rounded-full text-slate-300 font-medium">비활성 기체</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="heChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-400">수소보다 복잡하며, 587nm 부근의 강한 노란색 선이 특징적입니다.</p>
+                </div>
+
+                <div class="card-bg rounded-2xl p-6 border border-slate-800 shadow-xl">
+                    <div class="flex justify-between items-end mb-4">
+                        <h3 class="text-xl font-bold text-white">네온 (Ne) 방전관</h3>
+                        <span class="text-sm px-3 py-1 bg-slate-700 rounded-full text-slate-300 font-medium">네온사인</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="neChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-400">580nm 이상의 주황색과 붉은색 파장 영역에 수많은 선이 밀집되어 있어 강렬한 붉은빛을 냅니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-amber-400 flex items-center gap-3">
+                    <span class="w-2 h-8 bg-amber-500 rounded-full"></span>
+                    분자 및 혼합 기체의 스펙트럼
+                </h2>
+                <p class="mt-2 text-slate-300 leading-relaxed pl-5">
+                    단일 원자가 아닌 분자 상태(예: N₂)이거나 여러 기체가 섞인 혼합물(예: 공기)의 경우, 에너지 준위가 매우 복잡하게 얽혀 있어 선들이 빽빽하게 모인 띠(Band) 형태의 스펙트럼이나 수많은 선들이 복합적으로 나타납니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card-bg rounded-2xl p-6 border border-slate-800 shadow-xl">
+                    <div class="flex justify-between items-end mb-4">
+                        <h3 class="text-xl font-bold text-white">질소 (N₂) 방전관</h3>
+                        <span class="text-sm px-3 py-1 bg-slate-700 rounded-full text-slate-300 font-medium">분자 스펙트럼</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="nChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-400">분자의 진동과 회전에 의해 수많은 미세한 선들이 띠를 이루어 넓게 퍼진 형태로 관찰됩니다.</p>
+                </div>
+
+                <div class="card-bg rounded-2xl p-6 border border-slate-800 shadow-xl">
+                    <div class="flex justify-between items-end mb-4">
+                        <h3 class="text-xl font-bold text-white">공기 (Air) 방전관</h3>
+                        <span class="text-sm px-3 py-1 bg-slate-700 rounded-full text-slate-300 font-medium">혼합 기체</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="airChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-slate-400">대부분을 차지하는 질소(N₂)의 분자 스펙트럼과 일부 산소(O₂)의 스펙트럼이 혼합되어 매우 복잡한 형태를 띱니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-16">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">관찰 데이터 요약 (주요 파장 및 색상)</h2>
+            <div class="overflow-x-auto bg-slate-800 rounded-xl shadow-xl border border-slate-700">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900 border-b border-slate-700">
+                            <th class="p-4 text-slate-300 font-bold">광원 종류</th>
+                            <th class="p-4 text-slate-300 font-bold">스펙트럼 형태</th>
+                            <th class="p-4 text-slate-300 font-bold">주요 파장 (nm) 및 색상</th>
+                            <th class="p-4 text-slate-300 font-bold">육안 발광색</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-slate-300">
+                        <tr class="border-b border-slate-700 hover:bg-slate-750 transition-colors">
+                            <td class="p-4 font-semibold text-white">LED등</td>
+                            <td class="p-4">연속 스펙트럼</td>
+                            <td class="p-4">400 ~ 700 전체 영역 연속</td>
+                            <td class="p-4">백색</td>
+                        </tr>
+                        <tr class="border-b border-slate-700 hover:bg-slate-750 transition-colors">
+                            <td class="p-4 font-semibold text-white">수소 (H)</td>
+                            <td class="p-4">선 스펙트럼</td>
+                            <td class="p-4">
+                                <span class="text-purple-400">410</span>, 
+                                <span class="text-indigo-400">434</span>, 
+                                <span class="text-teal-400">486</span>, 
+                                <span class="text-red-500 font-bold">656</span>
+                            </td>
+                            <td class="p-4">적자색</td>
+                        </tr>
+                        <tr class="border-b border-slate-700 hover:bg-slate-750 transition-colors">
+                            <td class="p-4 font-semibold text-white">헬륨 (He)</td>
+                            <td class="p-4">선 스펙트럼</td>
+                            <td class="p-4">
+                                <span class="text-indigo-400">447</span>, 
+                                <span class="text-emerald-400">501</span>, 
+                                <span class="text-yellow-400 font-bold">587</span>, 
+                                <span class="text-red-500">667</span>
+                            </td>
+                            <td class="p-4">연분홍/황색</td>
+                        </tr>
+                        <tr class="border-b border-slate-700 hover:bg-slate-750 transition-colors">
+                            <td class="p-4 font-semibold text-white">질소 (N₂)</td>
+                            <td class="p-4">띠(분자) 스펙트럼</td>
+                            <td class="p-4">청색~자외선 영역 및 붉은색 영역 띠</td>
+                            <td class="p-4">자주색/청보라</td>
+                        </tr>
+                        <tr class="border-b border-slate-700 hover:bg-slate-750 transition-colors">
+                            <td class="p-4 font-semibold text-white">네온 (Ne)</td>
+                            <td class="p-4">선 스펙트럼</td>
+                            <td class="p-4"><span class="text-orange-500 font-bold">580 ~ 750 (주황/적색 다수 밀집)</span></td>
+                            <td class="p-4">진홍색/주황색</td>
+                        </tr>
+                        <tr class="hover:bg-slate-750 transition-colors">
+                            <td class="p-4 font-semibold text-white">공기 (Air)</td>
+                            <td class="p-4">혼합/띠 스펙트럼</td>
+                            <td class="p-4">질소 스펙트럼 + 산소(777nm 적색 등) 일부</td>
+                            <td class="p-4">옅은 보라색</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function wrapLabel(label, maxLength = 16) {
+            if (typeof label !== 'string' || label.length <= maxLength) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (let word of words) {
+                if ((currentLine + word).length > maxLength) {
+                    if (currentLine.length > 0) lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            }
+            if (currentLine.trim().length > 0) lines.push(currentLine.trim());
+            return lines;
+        }
+
+        function wavelengthToRGB(wavelength) {
+            let r = 0, g = 0, b = 0;
+            if (wavelength >= 380 && wavelength < 440) {
+                r = -(wavelength - 440) / (440 - 380);
+                g = 0;
+                b = 1;
+            } else if (wavelength >= 440 && wavelength < 490) {
+                r = 0;
+                g = (wavelength - 440) / (490 - 440);
+                b = 1;
+            } else if (wavelength >= 490 && wavelength < 510) {
+                r = 0;
+                g = 1;
+                b = -(wavelength - 510) / (510 - 490);
+            } else if (wavelength >= 510 && wavelength < 580) {
+                r = (wavelength - 510) / (580 - 510);
+                g = 1;
+                b = 0;
+            } else if (wavelength >= 580 && wavelength < 645) {
+                r = 1;
+                g = -(wavelength - 645) / (645 - 580);
+                b = 0;
+            } else if (wavelength >= 645 && wavelength <= 780) {
+                r = 1;
+                g = 0;
+                b = 0;
+            }
+            let intensity = 1;
+            if (wavelength >= 380 && wavelength < 420) {
+                intensity = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+            } else if (wavelength >= 420 && wavelength <= 700) {
+                intensity = 1.0;
+            } else if (wavelength > 700 && wavelength <= 780) {
+                intensity = 0.3 + 0.7 * (780 - wavelength) / (780 - 700);
+            }
+            const rScaled = Math.round(r * intensity * 255);
+            const gScaled = Math.round(g * intensity * 255);
+            const bScaled = Math.round(b * intensity * 255);
+            return `rgb(${rScaled}, ${gScaled}, ${bScaled})`;
+        }
+
+        function createSpectrumConfig(dataPoints, isContinuous = false) {
+            const rawLabels = [];
+            const dataValues = [];
+            const backgroundColors = [];
+            
+            if (isContinuous) {
+                for (let wl = 400; wl <= 700; wl += 1) {
+                    rawLabels.push(wl.toString() + ' nm');
+                    dataValues.push({ x: wl, y: 1 });
+                    backgroundColors.push(wavelengthToRGB(wl));
+                }
+            } else {
+                for (let pt of dataPoints) {
+                    rawLabels.push(pt.w.toString() + ' nm');
+                    dataValues.push({ x: pt.w, y: pt.i });
+                    backgroundColors.push(wavelengthToRGB(pt.w));
+                }
+            }
+
+            const processedLabels = rawLabels.map(label => wrapLabel(label));
+
+            return {
+                type: 'bar',
+                data: {
+                    labels: processedLabels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: backgroundColors,
+                        barThickness: isContinuous ? 'flex' : 3,
+                        categoryPercentage: 1.0,
+                        barPercentage: 1.0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    animation: false,
+                    layout: { padding: { top: 10, bottom: 10, left: 10, right: 10 } },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: 400,
+                            max: 700,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)', drawTicks: false },
+                            ticks: { 
+                                color: '#94a3b8', 
+                                stepSize: 50,
+                                callback: function(value) { return value + 'nm'; }
+                            },
+                            border: { display: false }
+                        },
+                        y: {
+                            display: false,
+                            min: 0,
+                            max: 1.1
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#e2e8f0',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                        return label.join(' ');
+                                    } else {
+                                        return label;
+                                    }
+                                },
+                                label: function() { return ''; }
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        const hLines = [{w:410, i:0.8}, {w:434, i:0.9}, {w:486, i:1}, {w:656, i:1}];
+        
+        const heLines = [{w:447, i:0.8}, {w:471, i:0.5}, {w:492, i:0.6}, {w:501, i:0.9}, {w:587, i:1}, {w:667, i:0.8}, {w:706, i:0.4}];
+        
+        const neLines = [
+            {w:540, i:0.3}, {w:585, i:0.9}, {w:588, i:0.8}, {w:594, i:0.7}, 
+            {w:603, i:0.8}, {w:609, i:0.9}, {w:614, i:1}, {w:621, i:0.8}, 
+            {w:626, i:0.9}, {w:633, i:0.8}, {w:640, i:1}, {w:650, i:0.9}, 
+            {w:692, i:0.8}, {w:703, i:0.7}
+        ];
+        
+        const nLines = [
+            {w:405, i:0.6}, {w:420, i:0.5}, {w:434, i:0.6}, {w:463, i:0.4},
+            {w:480, i:0.5}, {w:497, i:0.7}, {w:500, i:0.8}, {w:533, i:0.4},
+            {w:567, i:0.6}, {w:575, i:0.7}, {w:605, i:0.9}, {w:648, i:1},
+            {w:654, i:0.9}, {w:662, i:0.8}, {w:674, i:0.7}
+        ];
+        
+        const airLines = [
+            {w:405, i:0.5}, {w:434, i:0.5}, {w:497, i:0.6}, {w:500, i:0.7},
+            {w:567, i:0.5}, {w:605, i:0.8}, {w:615, i:0.6}, {w:648, i:0.9},
+            {w:654, i:0.8}, {w:777, i:1}
+        ];
+
+        new Chart(document.getElementById('ledChart'), createSpectrumConfig([], true));
+        new Chart(document.getElementById('hChart'), createSpectrumConfig(hLines, false));
+        new Chart(document.getElementById('heChart'), createSpectrumConfig(heLines, false));
+        new Chart(document.getElementById('neChart'), createSpectrumConfig(neLines, false));
+        new Chart(document.getElementById('nChart'), createSpectrumConfig(nLines, false));
+        new Chart(document.getElementById('airChart'), createSpectrumConfig(airLines, false));
+    </script>
+</body>
+</html>
