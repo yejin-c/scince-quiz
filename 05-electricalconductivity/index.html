@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>화학결합 탐구 실험실</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f1eb;
+  --bg2: #ede9e0;
+  --surface: #ffffff;
+  --surface2: #faf8f4;
+  --border: #e0dbd0;
+  --border2: #ccc7ba;
+  --text: #1a1714;
+  --text2: #6b6257;
+  --text3: #9e9487;
+  --accent: #2d5be3;
+  --accent2: #1e429f;
+  --teal: #0d7a6e;
+  --red: #c0392b;
+  --amber: #d97706;
+  --green: #15803d;
+  --blue: #1d4ed8;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.12);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* HEADER */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+  position: sticky; top:0; z-index:100;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.hinner { max-width:1100px; margin:0 auto; padding:0 28px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.logo { display:flex; align-items:center; gap:12px; }
+.logo-icon { width:36px; height:36px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+h1 { font-size:18px; font-weight:700; letter-spacing:-0.02em; }
+h1 em { color:var(--accent); font-style:normal; }
+.badge { font-family:'DM Mono',monospace; font-size:11px; color:var(--text3); background:var(--bg2); border:1px solid var(--border); padding:3px 10px; border-radius:20px; }
+
+/* MAIN TABS */
+.wrap { max-width:1100px; margin:0 auto; padding:28px 28px 60px; }
+.main-tabs { display:flex; gap:6px; margin-bottom:28px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:5px; width:fit-content; }
+.mtab { padding:9px 22px; border-radius:8px; border:none; background:transparent; color:var(--text2); font-size:14px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; font-weight:500; }
+.mtab.active { background:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(45,91,227,0.3); }
+.mtab:hover:not(.active) { background:var(--bg2); color:var(--text); }
+
+.panel { display:none; }
+.panel.active { display:block; animation:fadeUp .3s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* STATE TOGGLE */
+.state-row { display:flex; align-items:center; gap:14px; margin-bottom:24px; }
+.state-toggle { display:inline-flex; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:4px; gap:4px; }
+.stbtn { padding:8px 22px; border-radius:7px; border:none; background:transparent; color:var(--text2); font-size:13px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .22s; font-weight:500; }
+.stbtn.active { background:var(--text); color:#fff; }
+.hint { font-size:12px; color:var(--text3); font-family:'DM Mono',monospace; }
+
+/* EXPERIMENT GRID */
+.exp-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+
+.exp-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:18px 14px 14px;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  box-shadow:var(--shadow); transition:box-shadow .2s, border-color .2s;
+}
+.exp-card:hover { box-shadow:var(--shadow-lg); border-color:var(--border2); }
+.exp-card.lit { border-color:rgba(217,119,6,0.4); box-shadow:0 4px 20px rgba(217,119,6,0.12); }
+
+.card-top { display:flex; flex-direction:column; align-items:center; gap:4px; width:100%; }
+.sub-name { font-size:13px; font-weight:700; text-align:center; }
+.sub-formula { font-size:11px; font-family:'DM Mono',monospace; color:var(--text3); }
+.sub-typebadge { font-size:10px; padding:2px 9px; border-radius:20px; font-weight:600; }
+.badge-cov { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; }
+.badge-ion { background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe; }
+
+/* CIRCUIT + DISH/BEAKER canvas area */
+.circuit-area { position:relative; width:100%; }
+canvas.exp-cv { display:block; width:100%; border-radius:8px; }
+
+/* START BUTTON */
+.start-btn {
+  width:100%; padding:8px; border-radius:8px; border:1.5px solid var(--border2);
+  background:var(--surface2); color:var(--text2); font-size:12px; font-weight:600;
+  font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s;
+  letter-spacing:0.02em;
+}
+.start-btn:hover { background:var(--bg2); border-color:var(--accent); color:var(--accent); }
+.start-btn.running { background:var(--accent); color:#fff; border-color:var(--accent); }
+.start-btn.done-off { background:#f1f5f9; color:var(--text3); border-color:var(--border); cursor:default; }
+.start-btn.done-on { background:#fef3c7; color:#92400e; border-color:#fcd34d; cursor:default; }
+
+/* RESULT + INFO */
+.results-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 22px; margin-bottom:14px; box-shadow:var(--shadow); }
+.rtitle { font-size:13px; font-weight:600; color:var(--text2); margin-bottom:12px; }
+.rgrid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.rrow { display:flex; align-items:center; gap:10px; padding:9px 14px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); font-size:13px; }
+.rbulb { width:18px; height:18px; border-radius:50%; border:2px solid var(--border2); flex-shrink:0; transition:all .5s; }
+.rbulb.on { background:#fbbf24; border-color:#f59e0b; box-shadow:0 0 8px rgba(251,191,36,.7); }
+.rbulb.off { background:#f1f5f9; }
+.rstatus { margin-left:auto; font-family:'DM Mono',monospace; font-size:11px; }
+.rstatus.on { color:var(--amber); }
+.rstatus.off { color:var(--text3); }
+
+.info-box { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:13px 17px; font-size:13px; color:var(--text2); line-height:1.75; }
+.info-box strong { color:var(--text); }
+.hl-teal { color:var(--teal); font-weight:600; }
+.hl-blue { color:var(--blue); font-weight:600; }
+.hl-amber { color:var(--amber); font-weight:600; }
+
+/* ====== ANALYSIS PANEL ====== */
+.atabs { display:flex; gap:6px; margin-bottom:18px; }
+.atab { padding:8px 18px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text2); font-size:13px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; font-weight:500; }
+.atab.active { background:var(--text); color:#fff; border-color:var(--text); }
+.atab:hover:not(.active) { background:var(--bg2); }
+
+/* Covalent sub-tabs */
+.sub-tabs { display:flex; gap:6px; margin-bottom:14px; }
+.subtab { padding:6px 14px; border-radius:7px; border:1px solid var(--border); background:var(--surface); color:var(--text3); font-size:12px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; }
+.subtab.active { background:var(--teal); color:#fff; border-color:var(--teal); }
+
+/* Migration sub-buttons */
+.mig-subs { display:flex; gap:8px; margin-bottom:14px; align-items:center; }
+.migbtn { padding:7px 18px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text2); font-size:13px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .2s; font-weight:500; }
+.migbtn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.migbtn:hover:not(.active) { background:var(--bg2); }
+
+.sim-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); }
+#acv { display:block; width:100%; }
+.sim-footer { padding:11px 18px; border-top:1px solid var(--border); background:var(--surface2); display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.leg-row { display:flex; gap:14px; flex-wrap:wrap; flex:1; }
+.leg { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text2); }
+.legdot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+.elec-toggle { padding:7px 18px; border-radius:8px; border:1.5px solid var(--border2); background:var(--surface); color:var(--text2); font-size:12px; font-weight:600; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all .25s; }
+.elec-toggle.on { background:#dc2626; color:#fff; border-color:#dc2626; box-shadow:0 2px 10px rgba(220,38,38,.3); }
+.elec-stat { font-size:11px; font-family:'DM Mono',monospace; color:var(--text3); }
+.elec-stat.live { color:var(--amber); font-weight:600; }
+
+.adesc { margin-top:12px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:13px 17px; font-size:13px; color:var(--text2); line-height:1.75; box-shadow:var(--shadow); }
+.adesc strong { color:var(--text); }
+
+@media(max-width:700px){
+  .exp-grid{grid-template-columns:repeat(2,1fr);}
+  .rgrid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hinner">
+    <div class="logo">
+      <div class="logo-icon">🧪</div>
+      <h1>공유결합 &amp; <em>이온결합</em> 탐구 실험실</h1>
+    </div>
+    <span class="badge">CHEM · 화학결합 탐구</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="main-tabs">
+    <button class="mtab active" onclick="switchMain('exp')"><span>⚡ 전기전도성 실험</span></button>
+    <button class="mtab" onclick="switchMain('analysis')"><span>🔬 결과 분석</span></button>
+  </div>
+
+  <!-- ===== PANEL 1: EXPERIMENT ===== -->
+  <div class="panel active" id="panel-exp">
+    <div class="state-row">
+      <div class="state-toggle">
+        <button class="stbtn active" onclick="setExpState('solid')">🧱 고체 상태</button>
+        <button class="stbtn" onclick="setExpState('aqueous')">💧 수용액 상태</button>
+      </div>
+      <span class="hint" id="state-hint">페트리 접시에 담긴 고체 시료</span>
+    </div>
+
+    <div class="exp-grid" id="exp-grid"></div>
+
+    <div class="results-card">
+      <div class="rtitle" id="rtitle">실험 결과</div>
+      <div class="rgrid" id="rgrid"></div>
+    </div>
+    <div class="info-box" id="ibox"></div>
+  </div>
+
+  <!-- ===== PANEL 2: ANALYSIS ===== -->
+  <div class="panel" id="panel-analysis">
+    <div class="atabs">
+      <button class="atab active" onclick="switchA('cov')">공유결합 수용액 입자</button>
+      <button class="atab" onclick="switchA('mig')">이온 이동 시뮬레이션</button>
+    </div>
+
+    <!-- Covalent sub-tabs -->
+    <div id="cov-subtabs" class="sub-tabs">
+      <button class="subtab active" onclick="setCovSub('sugar')">설탕 수용액</button>
+      <button class="subtab" onclick="setCovSub('starch')">녹말 현탁액</button>
+    </div>
+
+    <!-- Migration sub-buttons -->
+    <div id="mig-subs" class="mig-subs" style="display:none;">
+      <button class="migbtn active" onclick="setMigSub('nacl')">NaCl 수용액</button>
+      <button class="migbtn" onclick="setMigSub('cucl2')">CuCl₂ 수용액</button>
+      <button class="elec-toggle" id="elec-btn" onclick="toggleElec()">전원 ON</button>
+      <span class="elec-stat" id="elec-stat">전류 흐르지 않음</span>
+    </div>
+
+    <div class="sim-card">
+      <canvas id="acv" width="1040" height="320"></canvas>
+      <div class="sim-footer">
+        <div class="leg-row" id="aleg"></div>
+      </div>
+    </div>
+    <div class="adesc" id="adesc"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+============================================================ */
+const SUBS = [
+  { name:'설탕', formula:'C₁₂H₂₂O₁₁', type:'cov', pCol:'#c4a45a', cu:false, conducts:false },
+  { name:'녹말', formula:'(C₆H₁₀O₅)ₙ', type:'cov', pCol:'#a0845a', cu:false, conducts:false },
+  { name:'염화나트륨', formula:'NaCl',   type:'ion', pCol:'#94a3b8', cu:false, conducts:true },
+  { name:'염화구리',   formula:'CuCl₂',  type:'ion', pCol:'#0d9488', cu:true,  conducts:true },
+];
+
+let expState = 'solid';
+let expPhase = {}; // per-card: 'idle'|'running'|'done'
+let expRAF = {};
+
+/* ============================================================
+   MAIN TAB
+============================================================ */
+function switchMain(tab) {
+  document.querySelectorAll('.mtab').forEach((b,i)=>b.classList.toggle('active',['exp','analysis'][i]===tab));
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',['panel-exp','panel-analysis'][i]==='panel-'+tab));
+  if(tab==='analysis') setTimeout(renderAnalysis, 50);
+}
+
+/* ============================================================
+   EXPERIMENT STATE
+============================================================ */
+function setExpState(s) {
+  expState = s;
+  expPhase = {};
+  Object.values(expRAF).forEach(r=>cancelAnimationFrame(r));
+  expRAF = {};
+  document.querySelectorAll('.stbtn').forEach((b,i)=>b.classList.toggle('active',['solid','aqueous'][i]===s));
+  document.getElementById('state-hint').textContent = s==='solid'?'페트리 접시에 담긴 고체 시료':'비커에 담긴 수용액 시료';
+  renderExpGrid();
+  renderResults();
+  renderInfoBox();
+}
+
+/* ============================================================
+   EXPERIMENT GRID
+============================================================ */
+function renderExpGrid() {
+  const grid = document.getElementById('exp-grid');
+  grid.innerHTML = '';
+  SUBS.forEach((s,i) => {
+    const card = document.createElement('div');
+    card.className = 'exp-card';
+    card.id = `card-${i}`;
+
+    const top = document.createElement('div'); top.className='card-top';
+    top.innerHTML = `<span class="sub-name">${s.name}</span>
+      <span class="sub-formula">${s.formula}</span>
+      <span class="sub-typebadge ${s.type==='cov'?'badge-cov':'badge-ion'}">${s.type==='cov'?'공유결합':'이온결합'}</span>`;
+
+    const cv = document.createElement('canvas');
+    cv.className='exp-cv'; cv.width=160; cv.height=180;
+    cv.id=`cv-${i}`;
+
+    const btn = document.createElement('button');
+    btn.className='start-btn'; btn.id=`btn-${i}`;
+    btn.textContent='▶ 실험 시작';
+    btn.onclick = () => startExp(i);
+
+    card.appendChild(top); card.appendChild(cv); card.appendChild(btn);
+    grid.appendChild(card);
+    drawExpIdle(cv, s);
+  });
+}
+
+/* ---- Draw functions ---- */
+function drawExpIdle(cv, sub) {
+  const ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  if(expState==='solid') drawDish(ctx,W,H,sub,false,false,0);
+  else drawBeaker(ctx,W,H,sub,false,false,0);
+}
+
+/* PETRI DISH */
+function drawDish(ctx,W,H,sub,bulbOn,animating,t) {
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, dishY=H-68, dishR=52, dishH=14;
+
+  // --- CIRCUIT WIRES ---
+  // Left wire from bottom of bulb down to dish left
+  ctx.strokeStyle='#9ca3af'; ctx.lineWidth=2; ctx.setLineDash([]);
+  // Wire: bulb base → left dish rim
+  ctx.beginPath();
+  ctx.moveTo(cx-12, 38); ctx.lineTo(cx-12, 55); ctx.lineTo(cx-dishR+8, 55); ctx.lineTo(cx-dishR+8, dishY-8);
+  ctx.stroke();
+  // Wire: bulb base → right dish rim
+  ctx.beginPath();
+  ctx.moveTo(cx+12, 38); ctx.lineTo(cx+12, 55); ctx.lineTo(cx+dishR-8, 55); ctx.lineTo(cx+dishR-8, dishY-8);
+  ctx.stroke();
+  // Electrode tips into dish
+  ctx.strokeStyle='#6b7280'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(cx-dishR+8, dishY-8); ctx.lineTo(cx-dishR+8, dishY+2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+dishR-8, dishY-8); ctx.lineTo(cx+dishR-8, dishY+2); ctx.stroke();
+
+  // --- BULB ---
+  drawBulb(ctx, cx, 20, bulbOn, animating, t);
+
+  // --- PETRI DISH ---
+  // Outer rim
+  ctx.fillStyle='#e2e8f0'; ctx.strokeStyle='#94a3b8'; ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.ellipse(cx, dishY, dishR+5, 8, 0, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+  // Dish body
+  ctx.beginPath();
+  ctx.ellipse(cx, dishY, dishR, 7, 0, 0, Math.PI*2);
+  ctx.fillStyle='#f8fafc'; ctx.fill();
+  ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=1; ctx.stroke();
+  // Dish side walls
+  ctx.beginPath();
+  ctx.ellipse(cx, dishY+dishH, dishR, 6, 0, 0, Math.PI);
+  ctx.moveTo(cx-dishR, dishY); ctx.lineTo(cx-dishR, dishY+dishH);
+  ctx.moveTo(cx+dishR, dishY); ctx.lineTo(cx+dishR, dishY+dishH);
+  ctx.strokeStyle='#94a3b8'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Solid powder inside dish
+  const fillC = sub.cu ? 'rgba(20,184,166,0.3)' : sub.type==='ion'?'rgba(148,163,184,0.4)':'rgba(196,164,90,0.35)';
+  ctx.beginPath(); ctx.ellipse(cx, dishY+3, dishR-8, 4, 0, 0, Math.PI*2);
+  ctx.fillStyle=fillC; ctx.fill();
+  // Powder particles
+  const seed=sub.name.length*13;
+  for(let i=0;i<18;i++){
+    const angle=(i/18)*Math.PI*2+(seed*0.1);
+    const r=3+((i*17+seed)%18);
+    const px=cx+Math.cos(angle)*r*1.8;
+    const py=dishY+2+Math.sin(angle)*r*0.35;
+    ctx.beginPath(); ctx.arc(px,py,1.5,0,Math.PI*2);
+    ctx.fillStyle=sub.pCol; ctx.fill();
+  }
+
+  // Electrode labels in dish
+  ctx.fillStyle='#475569'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('−',cx-dishR+8,dishY-10);
+  ctx.fillText('+',cx+dishR-8,dishY-10);
+}
+
+/* BEAKER */
+function drawBeaker(ctx,W,H,sub,bulbOn,animating,t) {
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, bx=22, by=55, bw=W-44, bh=H-75;
+
+  // Circuit wires
+  ctx.strokeStyle='#9ca3af'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(cx-10,38); ctx.lineTo(cx-10,52); ctx.lineTo(bx+10,52); ctx.lineTo(bx+10,by+6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+10,38); ctx.lineTo(cx+10,52); ctx.lineTo(bx+bw-10,52); ctx.lineTo(bx+bw-10,by+6); ctx.stroke();
+
+  // Bulb
+  drawBulb(ctx, cx, 20, bulbOn, animating, t);
+
+  // Water fill
+  const wColor = sub.cu ? 'rgba(20,184,166,0.22)' : 'rgba(147,197,253,0.3)';
+  ctx.fillStyle=wColor;
+  ctx.fillRect(bx+1.5, by+18, bw-3, bh-20);
+
+  // Beaker body
+  ctx.strokeStyle='#94a3b8'; ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(bx,by); ctx.lineTo(bx,by+bh); ctx.lineTo(bx+bw,by+bh); ctx.lineTo(bx+bw,by);
+  ctx.stroke();
+  // Brim
+  ctx.beginPath(); ctx.moveTo(bx-4,by); ctx.lineTo(bx+bw+4,by); ctx.stroke();
+  // Pour spout hint
+  ctx.beginPath(); ctx.moveTo(bx+bw,by); ctx.lineTo(bx+bw+4,by-4); ctx.stroke();
+
+  // Graduated marks
+  ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=0.8;
+  for(let m=1;m<=3;m++){
+    const my=by+bh-m*(bh/4);
+    ctx.beginPath(); ctx.moveTo(bx+bw-10,my); ctx.lineTo(bx+bw-1,my); ctx.stroke();
+  }
+
+  // Dissolved particles
+  const n=sub.type==='ion'?16:14;
+  const seed=sub.name.length*11;
+  for(let i=0;i<n;i++){
+    const px=bx+14+((i*39+seed*3)%(bw-28));
+    const py=by+24+((i*61+seed*7)%(bh-32));
+    if(sub.type==='ion'){
+      if(i%2===0){
+        ctx.beginPath(); ctx.arc(px,py,6,0,Math.PI*2);
+        ctx.fillStyle=sub.cu?'#14b8a6':'#3b82f6'; ctx.fill();
+        ctx.fillStyle='#fff'; ctx.font='bold 7px sans-serif'; ctx.textAlign='center';
+        ctx.fillText(sub.cu?'Cu²⁺':'Na⁺',px,py+2.5);
+      } else {
+        ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2);
+        ctx.fillStyle='#ef4444'; ctx.fill();
+        ctx.fillStyle='#fff'; ctx.font='bold 7px sans-serif'; ctx.textAlign='center';
+        ctx.fillText('Cl⁻',px,py+2.5);
+      }
+    } else {
+      ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2);
+      ctx.fillStyle=sub.pCol+'cc'; ctx.fill();
+      ctx.strokeStyle=sub.pCol+'44'; ctx.lineWidth=0.5; ctx.stroke();
+    }
+  }
+
+  // Electrode
+  ctx.strokeStyle='#6b7280'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(bx+10,by+6); ctx.lineTo(bx+10,by+bh*0.65); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(bx+bw-10,by+6); ctx.lineTo(bx+bw-10,by+bh*0.65); ctx.stroke();
+  ctx.fillStyle='#475569'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('−',bx+10,by+4);
+  ctx.fillText('+',bx+bw-10,by+4);
+}
+
+/* BULB DRAWING */
+function drawBulb(ctx, cx, cy, on, animating, t) {
+  // Glow halo
+  if(on || animating) {
+    const glow = animating ? Math.sin(t*0.12)*0.4+0.5 : 1;
+    const grad = ctx.createRadialGradient(cx,cy,4,cx,cy,26);
+    grad.addColorStop(0,`rgba(251,191,36,${0.5*glow})`);
+    grad.addColorStop(1,'rgba(251,191,36,0)');
+    ctx.beginPath(); ctx.arc(cx,cy,26,0,Math.PI*2);
+    ctx.fillStyle=grad; ctx.fill();
+  }
+  // Bulb glass
+  ctx.beginPath(); ctx.arc(cx,cy,12,0,Math.PI*2);
+  ctx.fillStyle = on ? '#fde68a' : '#f1f5f9';
+  ctx.fill();
+  ctx.strokeStyle = on ? '#f59e0b' : '#94a3b8';
+  ctx.lineWidth=1.5; ctx.stroke();
+  // Filament
+  ctx.strokeStyle = on ? '#b45309' : '#9ca3af';
+  ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.moveTo(cx-4,cy-5); ctx.lineTo(cx-2,cy); ctx.lineTo(cx+2,cy-4); ctx.lineTo(cx+4,cy+2); ctx.stroke();
+  // Base
+  ctx.fillStyle='#cbd5e1'; ctx.strokeStyle='#94a3b8'; ctx.lineWidth=1;
+  ctx.fillRect(cx-6,cy+10,12,6); ctx.strokeRect(cx-6,cy+10,12,6);
+  ctx.fillRect(cx-4,cy+16,8,5); ctx.strokeRect(cx-4,cy+16,8,5);
+}
+
+/* ============================================================
+   EXPERIMENT ANIMATION
+============================================================ */
+function startExp(i) {
+  if(expPhase[i]==='done') return;
+  expPhase[i]='running';
+  const btn=document.getElementById(`btn-${i}`);
+  btn.className='start-btn running'; btn.textContent='⏳ 측정 중...';
+
+  const sub=SUBS[i];
+  const cv=document.getElementById(`cv-${i}`);
+  const ctx=cv.getContext('2d');
+  let t=0, duration=80; // ~2.7s at 30fps
+  if(expRAF[i]) cancelAnimationFrame(expRAF[i]);
+
+  function animate(){
+    t++;
+    const conducts = expState==='aqueous' && sub.conducts;
+    // Flicker during run, then settle
+    let bulbOn=false, animating=false;
+    if(t<duration){
+      animating=conducts;
+      bulbOn=conducts && Math.sin(t*0.4)>0;
+    } else {
+      bulbOn=conducts;
+    }
+    if(expState==='solid') drawDish(ctx,cv.width,cv.height,sub,bulbOn,animating&&t<duration,t);
+    else drawBeaker(ctx,cv.width,cv.height,sub,bulbOn,animating&&t<duration,t);
+
+    if(t<duration+10){
+      expRAF[i]=requestAnimationFrame(animate);
+    } else {
+      expPhase[i]='done';
+      const finalOn=expState==='aqueous'&&sub.conducts;
+      const card=document.getElementById(`card-${i}`);
+      if(finalOn) card.classList.add('lit'); else card.classList.remove('lit');
+      btn.className=finalOn?'start-btn done-on':'start-btn done-off';
+      btn.textContent=finalOn?'💡 전류 흐름':'✗ 전류 없음';
+      updateResultRow(i, finalOn);
+    }
+  }
+  animate();
+}
+
+function updateResultRow(i, on) {
+  const row=document.getElementById(`rrow-${i}`);
+  if(!row) return;
+  const bulb=row.querySelector('.rbulb');
+  const stat=row.querySelector('.rstatus');
+  bulb.className='rbulb '+(on?'on':'off');
+  stat.className='rstatus '+(on?'on':'off');
+  stat.textContent=on?'전류 흐름 ✓':'전류 없음 ✗';
+}
+
+/* ============================================================
+   RESULTS
+============================================================ */
+function renderResults() {
+  const grid=document.getElementById('rgrid');
+  const title=document.getElementById('rtitle');
+  title.textContent=`실험 결과 — ${expState==='solid'?'고체':'수용액'} 상태 (실험 시작 후 업데이트)`;
+  grid.innerHTML='';
+  SUBS.forEach((s,i)=>{
+    const row=document.createElement('div'); row.className='rrow'; row.id=`rrow-${i}`;
+    row.innerHTML=`<div class="rbulb off"></div>
+      <span style="font-size:13px">${s.name}${expState==='aqueous'?' 수용액':''}</span>
+      <span class="rstatus off">대기 중</span>`;
+    grid.appendChild(row);
+  });
+}
+
+function renderInfoBox() {
+  const b=document.getElementById('ibox');
+  if(expState==='solid')
+    b.innerHTML='<strong>고체 상태</strong>: 공유결합·이온결합 물질 모두 전기가 통하지 않습니다. 이온결합 물질도 결정 격자 안에 이온이 고정되어 이동할 수 없기 때문입니다.';
+  else
+    b.innerHTML='<strong>수용액 상태</strong>: <span class="hl-blue">이온결합 물질(NaCl, CuCl₂)</span>은 이온으로 해리되어 전류가 흐릅니다. <span class="hl-teal">공유결합 물질(설탕, 녹말)</span>은 이온이 없어 전기가 통하지 않습니다. 염화구리 수용액은 <span class="hl-teal">Cu²⁺</span> 특유의 <strong>푸른색</strong>을 띱니다.';
+}
+
+/* ============================================================
+   ANALYSIS
+============================================================ */
+let aMode='cov', covSub='sugar', migSub='nacl', elecOn=false, raf=null, ions=[];
+
+function switchA(mode){
+  aMode=mode;
+  elecOn=false; if(raf){cancelAnimationFrame(raf);raf=null;}
+  document.querySelectorAll('.atab').forEach((b,i)=>b.classList.toggle('active',['cov','mig'][i]===mode));
+  document.getElementById('cov-subtabs').style.display=mode==='cov'?'flex':'none';
+  document.getElementById('mig-subs').style.display=mode==='mig'?'flex':'none';
+  const eb=document.getElementById('elec-btn');
+  if(eb){eb.className='elec-toggle';eb.textContent='전원 ON';}
+  const es=document.getElementById('elec-stat');
+  if(es){es.className='elec-stat';es.textContent='전류 흐르지 않음';}
+  renderAnalysis();
+}
+
+function setCovSub(s){ covSub=s; document.querySelectorAll('.subtab').forEach((b,i)=>b.classList.toggle('active',['sugar','starch'][i]===s)); renderAnalysis(); }
+function setMigSub(s){ migSub=s; document.querySelectorAll('.migbtn').forEach((b,i)=>b.classList.toggle('active',['nacl','cucl2'][i]===s)); elecOn=false; if(raf){cancelAnimationFrame(raf);raf=null;} const eb=document.getElementById('elec-btn'); if(eb){eb.className='elec-toggle';eb.textContent='전원 ON';} const es=document.getElementById('elec-stat'); if(es){es.className='elec-stat';es.textContent='전류 흐르지 않음';} renderAnalysis(); }
+
+function renderAnalysis(){
+  if(aMode==='cov') drawCovScene();
+  else { initIons(); drawMig(false); }
+}
+
+/* --- Covalent scene --- */
+function drawCovScene(){
+  const cv=document.getElementById('acv');
+  const ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+
+  const isSugar=covSub==='sugar';
+  const pCol=isSugar?'#c4a45a':'#a0845a';
+  const wCol='rgba(147,197,253,0.18)';
+
+  // Beaker bg
+  ctx.fillStyle=wCol; ctx.fillRect(0,0,W,H);
+
+  // Subtle wave
+  for(let i=0;i<6;i++){
+    ctx.strokeStyle='rgba(100,160,220,0.06)'; ctx.lineWidth=1;
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=4){
+      const y=20+i*50+Math.sin(x/45+i*0.8)*5;
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  // Molecule positions
+  const cols=10, rows=4;
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+    const cx=60+c*(W-100)/9+((r%2)*30);
+    const cy=50+r*65+((c%2)*10);
+    if(cx>W-30) continue;
+    drawMolecule(ctx, cx, cy, pCol, isSugar, r*cols+c);
+  }
+
+  // Floating label on a few molecules
+  const labelPositions=[[80,60],[260,120],[480,70],[700,130],[900,80],[160,250],[400,200],[620,260],[850,200]];
+  const lname=isSugar?'설탕':'녹말';
+  labelPositions.slice(0,6).forEach(([x,y],i)=>{
+    if(i%2===0){
+      ctx.fillStyle='rgba(60,40,10,0.55)'; ctx.font='bold 10px "Noto Sans KR"'; ctx.textAlign='center';
+      ctx.fillText(lname, x, y+26);
+    }
+  });
+
+  // No ion annotation
+  ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.font='13px "Noto Sans KR"'; ctx.textAlign='center';
+  ctx.fillText(`물에 녹은 ${lname} — 분자 상태 유지, 이온 없음`, W/2, H-16);
+
+  document.getElementById('aleg').innerHTML=`
+    <div class="leg"><div class="legdot" style="background:${pCol}"></div>${lname} 분자 (중성 분자, 이온화 없음)</div>
+    <div class="leg" style="color:#9e9487">※ 이온 없음 → 전기 불통</div>`;
+  document.getElementById('adesc').innerHTML=`공유결합 물질(${lname})은 물에 녹아도 <strong>분자 그대로</strong> 유지되며 이온으로 쪼개지지 않습니다. 전하를 띤 입자(이온)가 없으므로 전류가 흐르지 않습니다.`;
+}
+
+function drawMolecule(ctx, cx, cy, col, isSugar, seed) {
+  const r=isSugar?9:11;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle=col+'cc'; ctx.fill();
+  ctx.strokeStyle=col; ctx.lineWidth=1; ctx.stroke();
+  // Bonds + small atoms
+  const arms=isSugar?3:4;
+  for(let a=0;a<arms;a++){
+    const angle=(a/arms)*Math.PI*2+(seed*0.3);
+    const len=isSugar?13:15;
+    const ex=cx+Math.cos(angle)*len, ey=cy+Math.sin(angle)*len;
+    ctx.strokeStyle=col+'77'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ex,ey,isSugar?4:5,0,Math.PI*2);
+    ctx.fillStyle=col+'88'; ctx.fill();
+  }
+}
+
+/* --- Migration scene --- */
+function initIons(){
+  ions=[];
+  const W=1040, H=320;
+  const isCu=migSub==='cucl2';
+  const catN=isCu?8:10, anN=isCu?16:10;
+  for(let i=0;i<catN;i++) ions.push({t:'cat',x:100+Math.random()*840,y:40+Math.random()*240,vx:0,vy:(Math.random()-.5)*.5});
+  for(let i=0;i<anN;i++) ions.push({t:'an',x:100+Math.random()*840,y:40+Math.random()*240,vx:0,vy:(Math.random()-.5)*.5});
+}
+
+function drawMig(animate){
+  const cv=document.getElementById('acv');
+  if(!cv) return;
+  const ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const isCu=migSub==='cucl2';
+
+  // BG water
+  ctx.fillStyle=isCu?'rgba(20,184,166,0.10)':'rgba(147,197,253,0.15)';
+  ctx.fillRect(0,0,W,H);
+
+  // Field lines
+  if(elecOn){
+    for(let y=50;y<H-30;y+=55){
+      for(let x=90;x<W-90;x+=70){
+        ctx.strokeStyle='rgba(0,0,0,0.04)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+18,y); ctx.stroke();
+      }
+    }
+  }
+
+  // Electrodes
+  const ey=(H-210)/2;
+  ctx.fillStyle='#dbeafe'; ctx.fillRect(18,ey,20,210);
+  ctx.strokeStyle='#3b82f6'; ctx.lineWidth=2;
+  ctx.strokeRect(18,ey,20,210);
+  ctx.fillStyle='#1d4ed8'; ctx.font='bold 22px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('−',28,H/2+8);
+
+  ctx.fillStyle='#fee2e2'; ctx.fillRect(W-38,ey,20,210);
+  ctx.strokeStyle='#ef4444'; ctx.lineWidth=2;
+  ctx.strokeRect(W-38,ey,20,210);
+  ctx.fillStyle='#b91c1c'; ctx.font='bold 22px sans-serif';
+  ctx.fillText('+',W-28,H/2+8);
+
+  ctx.fillStyle='#6b7280'; ctx.font='11px "Noto Sans KR"'; ctx.textAlign='center';
+  ctx.fillText('음극 (−)',28,ey-8);
+  ctx.fillText('양극 (+)',W-28,ey-8);
+
+  // Draw ions
+  const catCol=isCu?'#0d9488':'#2563eb';
+  const catLabel=isCu?'Cu²⁺':'Na⁺';
+  ions.forEach(ion=>{
+    const isCat=ion.t==='cat';
+    const r=isCat?(isCu?14:12):11;
+    ctx.beginPath(); ctx.arc(ion.x,ion.y,r,0,Math.PI*2);
+    ctx.fillStyle=isCat?catCol:'#dc2626'; ctx.fill();
+    ctx.strokeStyle=isCat?(isCu?'#0f766e':'#1e40af'):'#991b1b'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font=`bold ${isCu&&isCat?'7':'8'}px sans-serif`; ctx.textAlign='center';
+    ctx.fillText(isCat?catLabel:'Cl⁻',ion.x,ion.y+3);
+
+    if(elecOn){
+      const dir=isCat?-1:1;
+      const ax=ion.x+dir*22;
+      ctx.strokeStyle=isCat?catCol:'#dc2626'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(ion.x+dir*r,ion.y); ctx.lineTo(ax,ion.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ax,ion.y); ctx.lineTo(ax-dir*5,ion.y-4); ctx.moveTo(ax,ion.y); ctx.lineTo(ax-dir*5,ion.y+4); ctx.stroke();
+    }
+  });
+
+  if(elecOn){
+    ctx.fillStyle='rgba(217,119,6,0.7)'; ctx.font='bold 13px "Noto Sans KR"'; ctx.textAlign='center';
+    ctx.fillText('⚡ 이온 이동 중 — 전류 흐름!', W/2, H-14);
+  }
+
+  const formula=isCu?'CuCl₂ → Cu²⁺ + 2Cl⁻':'NaCl → Na⁺ + Cl⁻';
+  document.getElementById('aleg').innerHTML=`
+    <div class="leg"><div class="legdot" style="background:${catCol}"></div>${catLabel} (양이온 → 음극으로)</div>
+    <div class="leg"><div class="legdot" style="background:#dc2626"></div>Cl⁻ (음이온 → 양극으로)</div>
+    <div class="leg" style="color:#9e9487">${formula}</div>`;
+  document.getElementById('adesc').innerHTML=`${isCu?'<strong>CuCl₂ 수용액</strong>은 Cu²⁺와 Cl⁻로 해리됩니다.':'<strong>NaCl 수용액</strong>은 Na⁺와 Cl⁻로 해리됩니다.'} 전기를 연결하면 <strong style="color:#1d4ed8">양이온은 음극(−)으로</strong>, <strong style="color:#b91c1c">음이온은 양극(+)으로</strong> 이동하면서 전류가 흐릅니다.`;
+
+  if(animate){
+    ions.forEach(ion=>{
+      const spd=1.4;
+      if(ion.t==='cat') ion.vx=Math.max(ion.vx-.07,-spd);
+      else ion.vx=Math.min(ion.vx+.07,spd);
+      ion.vy+=(Math.random()-.5)*.14;
+      ion.vy=Math.max(-.7,Math.min(.7,ion.vy));
+      ion.x+=ion.vx; ion.y+=ion.vy;
+      if(ion.x<50){ion.x=50;ion.vx=Math.abs(ion.vx)*.3;}
+      if(ion.x>W-50){ion.x=W-50;ion.vx=-Math.abs(ion.vx)*.3;}
+      if(ion.y<25){ion.y=25;ion.vy=Math.abs(ion.vy);}
+      if(ion.y>H-25){ion.y=H-25;ion.vy=-Math.abs(ion.vy);}
+    });
+    raf=requestAnimationFrame(()=>drawMig(true));
+  }
+}
+
+function toggleElec(){
+  elecOn=!elecOn;
+  if(raf){cancelAnimationFrame(raf);raf=null;}
+  const btn=document.getElementById('elec-btn');
+  const st=document.getElementById('elec-stat');
+  btn.className='elec-toggle'+(elecOn?' on':'');
+  btn.textContent=elecOn?'전원 OFF':'전원 ON';
+  st.className='elec-stat'+(elecOn?' live':'');
+  st.textContent=elecOn?'⚡ 전류 흐름 중!':'전류 흐르지 않음';
+  if(elecOn) drawMig(true);
+  else{ions.forEach(i=>{i.vx=0;});drawMig(false);}
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+renderExpGrid();
+renderResults();
+renderInfoBox();
+</script>
+</body>
+</html>
