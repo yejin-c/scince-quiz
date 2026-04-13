@@ -187,7 +187,6 @@ canvas.exp-cv { display:block; width:100%; border-radius:8px; }
       <div class="rtitle" id="rtitle">실험 결과</div>
       <div class="rgrid" id="rgrid"></div>
     </div>
-    <div class="info-box" id="ibox"></div>
   </div>
 
   <!-- ===== PANEL 2: ANALYSIS ===== -->
@@ -198,9 +197,11 @@ canvas.exp-cv { display:block; width:100%; border-radius:8px; }
     </div>
 
     <!-- Covalent sub-tabs -->
-    <div id="cov-subtabs" class="sub-tabs">
+    <div id="cov-subtabs" class="mig-subs">
       <button class="subtab active" onclick="setCovSub('sugar')">설탕 수용액</button>
       <button class="subtab" onclick="setCovSub('starch')">녹말 현탁액</button>
+      <button class="elec-toggle" id="cov-elec-btn" onclick="toggleCovElec()">전원 ON</button>
+      <span class="elec-stat" id="cov-elec-stat">전류 흐르지 않음</span>
     </div>
 
     <!-- Migration sub-buttons -->
@@ -257,7 +258,6 @@ function setExpState(s) {
   document.getElementById('state-hint').textContent = s==='solid'?'페트리 접시에 담긴 고체 시료':'비커에 담긴 수용액 시료';
   renderExpGrid();
   renderResults();
-  renderInfoBox();
 }
 
 /* ============================================================
@@ -540,11 +540,12 @@ function renderInfoBox() {
 /* ============================================================
    ANALYSIS
 ============================================================ */
-let aMode='cov', covSub='sugar', migSub='nacl', elecOn=false, raf=null, ions=[];
+let aMode='cov', covSub='sugar', migSub='nacl', elecOn=false, covElecOn=false, raf=null, ions=[];
 
 function switchA(mode){
   aMode=mode;
-  elecOn=false; if(raf){cancelAnimationFrame(raf);raf=null;}
+  elecOn=false; covElecOn=false;
+  if(raf){cancelAnimationFrame(raf);raf=null;}
   document.querySelectorAll('.atab').forEach((b,i)=>b.classList.toggle('active',['cov','mig'][i]===mode));
   document.getElementById('cov-subtabs').style.display=mode==='cov'?'flex':'none';
   document.getElementById('mig-subs').style.display=mode==='mig'?'flex':'none';
@@ -552,10 +553,36 @@ function switchA(mode){
   if(eb){eb.className='elec-toggle';eb.textContent='전원 ON';}
   const es=document.getElementById('elec-stat');
   if(es){es.className='elec-stat';es.textContent='전류 흐르지 않음';}
+  const ceb=document.getElementById('cov-elec-btn');
+  if(ceb){ceb.className='elec-toggle';ceb.textContent='전원 ON';}
+  const ces=document.getElementById('cov-elec-stat');
+  if(ces){ces.className='elec-stat';ces.textContent='전류 흐르지 않음';}
   renderAnalysis();
 }
 
-function setCovSub(s){ covSub=s; document.querySelectorAll('.subtab').forEach((b,i)=>b.classList.toggle('active',['sugar','starch'][i]===s)); renderAnalysis(); }
+function setCovSub(s){
+  covSub=s;
+  covElecOn=false;
+  document.querySelectorAll('.subtab').forEach((b,i)=>b.classList.toggle('active',['sugar','starch'][i]===s));
+  const ceb=document.getElementById('cov-elec-btn');
+  if(ceb){ceb.className='elec-toggle';ceb.textContent='전원 ON';}
+  const ces=document.getElementById('cov-elec-stat');
+  if(ces){ces.className='elec-stat';ces.textContent='전류 흐르지 않음';}
+  renderAnalysis();
+}
+
+function toggleCovElec(){
+  covElecOn=!covElecOn;
+  const btn=document.getElementById('cov-elec-btn');
+  const st=document.getElementById('cov-elec-stat');
+  // 공유결합 → 전원 켜도 아무 변화 없음 (전구 안 켜짐, 입자 그대로)
+  btn.className='elec-toggle'+(covElecOn?' on':'');
+  btn.textContent=covElecOn?'전원 OFF':'전원 ON';
+  st.className='elec-stat'; // 절대 live 클래스 안 줌
+  st.textContent=covElecOn?'전류 흐르지 않음 (이온 없음)':'전류 흐르지 않음';
+  drawCovScene(); // 재렌더 — 입자 변화 없음
+}
+
 function setMigSub(s){ migSub=s; document.querySelectorAll('.migbtn').forEach((b,i)=>b.classList.toggle('active',['nacl','cucl2'][i]===s)); elecOn=false; if(raf){cancelAnimationFrame(raf);raf=null;} const eb=document.getElementById('elec-btn'); if(eb){eb.className='elec-toggle';eb.textContent='전원 ON';} const es=document.getElementById('elec-stat'); if(es){es.className='elec-stat';es.textContent='전류 흐르지 않음';} renderAnalysis(); }
 
 function renderAnalysis(){
@@ -608,12 +635,17 @@ function drawCovScene(){
 
   // No ion annotation
   ctx.fillStyle='rgba(0,0,0,0.2)'; ctx.font='13px "Noto Sans KR"'; ctx.textAlign='center';
-  ctx.fillText(`물에 녹은 ${lname} — 분자 상태 유지, 이온 없음`, W/2, H-16);
+  if(covElecOn){
+    ctx.fillStyle='rgba(180,50,50,0.55)';
+    ctx.fillText(`전원 ON — 하지만 전류 흐르지 않음 (이온 없음)`, W/2, H-16);
+  } else {
+    ctx.fillText(`물에 녹은 ${lname} — 분자 상태 유지, 이온 없음`, W/2, H-16);
+  }
 
   document.getElementById('aleg').innerHTML=`
     <div class="leg"><div class="legdot" style="background:${pCol}"></div>${lname} 분자 (중성 분자, 이온화 없음)</div>
     <div class="leg" style="color:#9e9487">※ 이온 없음 → 전기 불통</div>`;
-  document.getElementById('adesc').innerHTML=`공유결합 물질(${lname})은 물에 녹아도 <strong>분자 그대로</strong> 유지되며 이온으로 쪼개지지 않습니다. 전하를 띤 입자(이온)가 없으므로 전류가 흐르지 않습니다.`;
+  document.getElementById('adesc').innerHTML=`공유결합 물질(${lname})은 물에 녹아도 <strong>분자 그대로</strong> 유지되며 이온으로 쪼개지지 않습니다. ${covElecOn?'<strong style="color:#c0392b">전원을 연결해도</strong> 전하를 띤 입자(이온)가 없으므로 전류가 흐르지 않습니다. 입자들은 아무 방향성 없이 그대로 있습니다.':'전하를 띤 입자(이온)가 없으므로 전류가 흐르지 않습니다.'}`;
 }
 
 function drawMolecule(ctx, cx, cy, col, isSugar, seed) {
@@ -751,7 +783,6 @@ function toggleElec(){
 ============================================================ */
 renderExpGrid();
 renderResults();
-renderInfoBox();
 </script>
 </body>
 </html>
